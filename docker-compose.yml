@@ -1,0 +1,78 @@
+version: '3.8'
+
+networks:
+  beeconect:
+    driver: bridge
+
+volumes:
+  postgres_auth_data:
+  redis_data:
+  rabbitmq_data:
+
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - beeconect
+
+  postgres-auth:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass_123
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - beeconect
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - beeconect
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - beeconect
+
+  auth-service:
+    build:
+      context: ../microservicii/bee_auth_services  # ✅ Path corect
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://auth_user:auth_pass_123@postgres-auth:5432/auth_db
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672/
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - beeconect
+    depends_on:
+      - postgres-auth
+      - redis
+      - rabbitmq
