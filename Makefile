@@ -16,6 +16,8 @@ dev: ## Start all services in development mode
 	@echo "  - Traefik Dashboard: http://localhost:8080"
 	@echo "  - RabbitMQ Management: http://localhost:15672"
 	@echo "  - Auth Service: http://localhost:8001"
+	@echo "  - Customers Service: http://localhost:8016"
+	@echo "  - Frontend Web Service: http://localhost:3001"
 
 prod: ## Start all services in production mode
 	@echo "Starting BeeConect production environment..."
