@@ -125,7 +125,14 @@ Toate serviciile folosesc baze PostgreSQL proprii.
 
 ## Documentație
 
-Documentația detaliată pentru fiecare componentă se găsește în directorul `documentatii/`. Pentru ghiduri specifice pentru agenți AI, consultați [AGENTS.md](AGENTS.md).
+Documentația detaliată pentru fiecare componentă se găsește în directorul `documentatii/`:
+
+- [Serviciul de Autentificare](documentatii/auth_service.md) - Documentație completă pentru configurarea și rularea serviciului de autentificare în mediile de dezvoltare și producție
+- [Docker Compose](documentatii/docker-compose.yml.md) - Explicații detaliate pentru configurația Docker Compose
+- [Makefile](documentatii/Makefile.md) - Documentație pentru comenzile disponibile în Makefile
+- [Variabile de Mediu](documentatii/.env.development.md) - Explicații pentru variabilele de mediu utilizate în dezvoltare
+
+Pentru ghiduri specifice pentru agenți AI, consultați [AGENTS.md](AGENTS.md).
 
 ## Contribuție
 
