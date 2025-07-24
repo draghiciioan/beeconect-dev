@@ -104,6 +104,10 @@ Toate serviciile folosesc baze PostgreSQL proprii.
 - `make help` - Afișează toate comenzile disponibile
 - `make setup` - Configurează mediul de dezvoltare
 - `make dev` - Pornește toate serviciile
+- `make infrastructure` - Pornește doar serviciile de infrastructură (baze de date, mesagerie)
+- `make auth-service` - Pornește serviciul de autentificare și componentele necesare
+- `make customers-service` - Pornește serviciul de clienți și componentele necesare
+- `make frontend-web-service` - Pornește interfața web și serviciile de care depinde
 - `make stop` - Oprește toate serviciile
 - `make clean` - Curăță tot
 
