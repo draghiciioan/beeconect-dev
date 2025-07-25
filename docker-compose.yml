@@ -89,7 +89,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_DB=0
       - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672/
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:3001
       - ENABLE_METRICS=true
       - DEBUG=true
     networks:
@@ -112,7 +112,7 @@ services:
       - RABBITMQ_EXCHANGE=bee.customers.events
       - LOG_SERVICE_URL=http://localhost:8100/logs
       - CUSTOMER_PATCH_RATE=5/minute
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://localhost:3001
       - DEBUG=true
     networks:
       - beeconect
@@ -128,8 +128,8 @@ services:
       - "3001:80"
     environment:
       - NODE_ENV=development
-      - REACT_APP_API_URL=http://localhost:8001
-      - REACT_APP_CUSTOMERS_API_URL=http://localhost:8016
+      - VITE_AUTH_API_URL=http://localhost:8001
+      - VITE_CUSTOMERS_API_URL=http://localhost:8016
     networks:
       - beeconect
     depends_on:
