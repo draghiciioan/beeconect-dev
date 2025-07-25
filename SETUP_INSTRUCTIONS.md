@@ -45,13 +45,13 @@ cd beeconect-dev
 make dev
 ```
 
-#### Pentru Windows
+#### Pentru Windows (folosind PowerShell)
 
 Pentru a porni toate serviciile în modul de dezvoltare, rulați:
 
 ```
 cd beeconect-dev
-dev.bat
+.\make.ps1 dev
 ```
 
 Aceasta va porni toate serviciile și va afișa URL-urile pentru accesarea lor:
@@ -72,13 +72,13 @@ cd beeconect-dev
 make stop-dev
 ```
 
-#### Pentru Windows
+#### Pentru Windows (folosind PowerShell)
 
 Pentru a opri toate serviciile, rulați:
 
 ```
 cd beeconect-dev
-stop.bat
+.\make.ps1 stop
 ```
 
 ### Curățare
@@ -92,13 +92,13 @@ cd beeconect-dev
 make clean
 ```
 
-#### Pentru Windows
+#### Pentru Windows (folosind PowerShell)
 
 Pentru a curăța toate containerele și volumele, rulați:
 
 ```
 cd beeconect-dev
-clean.bat
+.\make.ps1 clean
 ```
 
 ## URL-uri și porturi de servicii
@@ -137,8 +137,8 @@ Pe măsură ce sunt dezvoltate mai multe microservicii, acestea pot fi adăugate
 2. Adăugați microserviciul cu variabilele de mediu corespunzătoare
 3. Actualizați fișierul .env.development cu orice variabile de mediu noi
 4. Actualizați Makefile pentru a include informații despre noul serviciu
-5. Pentru suport Windows, creați sau actualizați fișierele batch corespunzătoare
+5. Pentru suport Windows, asigurați-vă că scriptul PowerShell (make.ps1) este actualizat
 
 ### Notă pentru dezvoltatorii Windows
 
-Fișierele batch (.bat) oferă aceeași funcționalitate ca și comenzile make pentru utilizatorii Windows. Când adăugați un nou microserviciu sau modificați configurația existentă, asigurați-vă că actualizați atât Makefile-ul cât și fișierele batch corespunzătoare pentru a menține compatibilitatea între platforme.
+Scriptul PowerShell (make.ps1) oferă aceeași funcționalitate ca și comenzile make pentru utilizatorii Windows. Când adăugați un nou microserviciu sau modificați configurația existentă, asigurați-vă că actualizați Makefile-ul pentru a menține compatibilitatea între platforme.

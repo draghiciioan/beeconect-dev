@@ -1,0 +1,296 @@
+.PHONY: help setup dev dev-verbose prod stop-dev stop-prod stop clean infrastructure auth-service customers-service web-service \
+        logs logs-auth logs-customers logs-web status check-health debug-auth debug-customers debug-web
+
+# Color definitions
+RESET := \033[0m
+RED := \033[0;31m
+GREEN := \033[0;32m
+YELLOW := \033[0;33m
+BLUE := \033[0;34m
+MAGENTA := \033[0;35m
+CYAN := \033[0;36m
+WHITE := \033[0;37m
+BOLD := \033[1m
+
+# Define the log file for capturing build output
+BUILD_LOG := build_output.log
+
+# Helper functions
+define print_status
+	@printf "$(BOLD)$(BLUE)>>> $(1)$(RESET)\n"
+endef
+
+define print_success
+	@printf "$(BOLD)$(GREEN)✓ $(1)$(RESET)\n"
+endef
+
+define print_warning
+	@printf "$(BOLD)$(YELLOW)⚠ $(1)$(RESET)\n"
+endef
+
+define print_error
+	@printf "$(BOLD)$(RED)✗ $(1)$(RESET)\n"
+endef
+
+define check_container_status
+	@if [ "$$(docker ps -q -f name=$(1))" ]; then \
+		if [ "$$(docker inspect --format='{{.State.Health.Status}}' $(1) 2>/dev/null)" = "healthy" ] || [ -z "$$(docker inspect --format='{{.State.Health.Status}}' $(1) 2>/dev/null)" ]; then \
+			printf "$(GREEN)✓ $(1) is running$(RESET)\n"; \
+		else \
+			printf "$(YELLOW)⚠ $(1) is running but may not be healthy$(RESET)\n"; \
+		fi; \
+	else \
+		if [ "$$(docker ps -a -q -f name=$(1))" ]; then \
+			printf "$(RED)✗ $(1) is created but not running$(RESET)\n"; \
+			printf "$(YELLOW)  Container logs:$(RESET)\n"; \
+			docker logs --tail=20 $(1) | sed 's/^/  /'; \
+		else \
+			printf "$(RED)✗ $(1) does not exist$(RESET)\n"; \
+		fi; \
+	fi
+endef
+
+define check_service_health
+	@echo "Checking $(1) health..."
+	@if curl -s -o /dev/null -w "%{http_code}" $(2) | grep -q "200\|401\|302"; then \
+		printf "$(GREEN)✓ $(1) is responding at $(2)$(RESET)\n"; \
+	else \
+		printf "$(RED)✗ $(1) is not responding at $(2)$(RESET)\n"; \
+		printf "$(YELLOW)  Container logs:$(RESET)\n"; \
+		docker logs --tail=20 beeconect-dev-$(3)-1 2>/dev/null | sed 's/^/  /' || echo "  No logs available"; \
+	fi
+endef
+
+help: ## Show help
+	@echo 'BeeConect Commands:'
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  $(BOLD)%-20s$(RESET) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+setup: ## Setup environment (both dev and prod)
+	$(call print_status,"Setting up BeeConect...")
+	@docker network create beeconect 2>/dev/null || true
+	@mkdir -p letsencrypt 2>/dev/null || true
+	$(call print_success,"Setup completed successfully")
+
+dev: ## Start all services in development mode
+	$(call print_status,"Starting BeeConect development environment...")
+	@rm -f $(BUILD_LOG)
+	@docker-compose --env-file .env.development up --build -d 2>&1 | tee $(BUILD_LOG) || ($(call print_error,"Failed to start services") && cat $(BUILD_LOG) && exit 1)
+	@if grep -q "error\|Error\|ERROR" $(BUILD_LOG); then \
+		$(call print_warning,"Potential issues detected during startup:"); \
+		grep -i "error\|Error\|ERROR" $(BUILD_LOG) | sed 's/^/  /'; \
+	fi
+	$(call print_success,"Development services started")
+	@echo "Development services available:"
+	@echo "  - Traefik Dashboard: http://localhost:8080"
+	@echo "  - RabbitMQ Management: http://localhost:15672"
+	@echo "  - Auth Service: http://localhost:8001"
+	@echo "  - Customers Service: http://localhost:8016"
+	@echo "  - Web Service: http://localhost:3001"
+	@echo ""
+	@echo "To check service health: $(BOLD)make check-health$(RESET)"
+	@echo "To view service status: $(BOLD)make status$(RESET)"
+	@echo "To view logs: $(BOLD)make logs$(RESET)"
+
+dev-verbose: ## Start all services in development mode with verbose output
+	$(call print_status,"Starting BeeConect development environment with verbose output...")
+	@docker-compose --env-file .env.development up --build
+
+prod: ## Start all services in production mode
+	$(call print_status,"Starting BeeConect production environment...")
+	@rm -f $(BUILD_LOG)
+	@docker-compose -f docker-compose.prod.yml --env-file .env.production up --build -d 2>&1 | tee $(BUILD_LOG) || ($(call print_error,"Failed to start services") && cat $(BUILD_LOG) && exit 1)
+	@if grep -q "error\|Error\|ERROR" $(BUILD_LOG); then \
+		$(call print_warning,"Potential issues detected during startup:"); \
+		grep -i "error\|Error\|ERROR" $(BUILD_LOG) | sed 's/^/  /'; \
+	fi
+	$(call print_success,"Production services started")
+	@echo "Production services available at:"
+	@echo "  - Auth Service: https://auth.$(shell grep DOMAIN_NAME .env.production | cut -d '=' -f2)"
+	@echo "  - Traefik Dashboard: https://traefik.$(shell grep DOMAIN_NAME .env.production | cut -d '=' -f2) (protected by basic auth)"
+
+infrastructure: ## Start only infrastructure services (traefik, postgres, redis, rabbitmq)
+	$(call print_status,"Starting infrastructure services...")
+	@rm -f $(BUILD_LOG)
+	@docker-compose --env-file .env.development up --build -d traefik postgres-auth postgres-customers redis rabbitmq 2>&1 | tee $(BUILD_LOG) || ($(call print_error,"Failed to start infrastructure services") && cat $(BUILD_LOG) && exit 1)
+	@if grep -q "error\|Error\|ERROR" $(BUILD_LOG); then \
+		$(call print_warning,"Potential issues detected during startup:"); \
+		grep -i "error\|Error\|ERROR" $(BUILD_LOG) | sed 's/^/  /'; \
+	fi
+	$(call print_success,"Infrastructure services started")
+	@echo "Infrastructure services available:"
+	@echo "  - Traefik Dashboard: http://localhost:8080"
+	@echo "  - RabbitMQ Management: http://localhost:15672"
+	@echo "  - PostgreSQL Auth: localhost:5432"
+	@echo "  - PostgreSQL Customers: localhost:5433"
+	@echo "  - Redis: localhost:6379"
+	@echo ""
+	@echo "To check service status: $(BOLD)make status$(RESET)"
+
+auth-service: ## Start auth-service with its dependencies
+	$(call print_status,"Starting auth-service with dependencies...")
+	@rm -f $(BUILD_LOG)
+	@docker-compose --env-file .env.development up --build -d postgres-auth redis rabbitmq auth-service 2>&1 | tee $(BUILD_LOG) || ($(call print_error,"Failed to start auth-service") && cat $(BUILD_LOG) && exit 1)
+	@if grep -q "error\|Error\|ERROR" $(BUILD_LOG); then \
+		$(call print_warning,"Potential issues detected during startup:"); \
+		grep -i "error\|Error\|ERROR" $(BUILD_LOG) | sed 's/^/  /'; \
+	fi
+	$(call print_success,"Auth service started")
+	@echo "Auth service available at: http://localhost:8001"
+	@echo "Dependencies available:"
+	@echo "  - PostgreSQL Auth: localhost:5432"
+	@echo "  - Redis: localhost:6379"
+	@echo "  - RabbitMQ Management: http://localhost:15672"
+	@echo ""
+	@echo "To check service health: $(BOLD)make debug-auth$(RESET)"
+	@echo "To view logs: $(BOLD)make logs-auth$(RESET)"
+
+customers-service: ## Start customers-service with its dependencies
+	$(call print_status,"Starting customers-service with dependencies...")
+	@rm -f $(BUILD_LOG)
+	@docker-compose --env-file .env.development up --build -d postgres-customers rabbitmq customers-service 2>&1 | tee $(BUILD_LOG) || ($(call print_error,"Failed to start customers-service") && cat $(BUILD_LOG) && exit 1)
+	@if grep -q "error\|Error\|ERROR" $(BUILD_LOG); then \
+		$(call print_warning,"Potential issues detected during startup:"); \
+		grep -i "error\|Error\|ERROR" $(BUILD_LOG) | sed 's/^/  /'; \
+	fi
+	$(call print_success,"Customers service started")
+	@echo "Customers service available at: http://localhost:8016"
+	@echo "Dependencies available:"
+	@echo "  - PostgreSQL Customers: localhost:5433"
+	@echo "  - RabbitMQ Management: http://localhost:15672"
+	@echo ""
+	@echo "To check service health: $(BOLD)make debug-customers$(RESET)"
+	@echo "To view logs: $(BOLD)make logs-customers$(RESET)"
+
+web-service: ## Start web-service with its dependencies
+	$(call print_status,"Starting web-service with dependencies...")
+	@rm -f $(BUILD_LOG)
+	@docker-compose --env-file .env.development up --build -d auth-service customers-service web-service 2>&1 | tee $(BUILD_LOG) || ($(call print_error,"Failed to start web-service") && cat $(BUILD_LOG) && exit 1)
+	@if grep -q "error\|Error\|ERROR" $(BUILD_LOG); then \
+		$(call print_warning,"Potential issues detected during startup:"); \
+		grep -i "error\|Error\|ERROR" $(BUILD_LOG) | sed 's/^/  /'; \
+	fi
+	$(call print_success,"Web service started")
+	@echo "Web Service available at: http://localhost:3001"
+	@echo "Dependencies available:"
+	@echo "  - Auth Service: http://localhost:8001"
+	@echo "  - Customers Service: http://localhost:8016"
+	@echo ""
+	@echo "To check service health: $(BOLD)make debug-web$(RESET)"
+	@echo "To view logs: $(BOLD)make logs-web$(RESET)"
+
+stop-dev: ## Stop development services
+	$(call print_status,"Stopping development services...")
+	@docker-compose --env-file .env.development down
+	$(call print_success,"Development services stopped")
+
+stop-prod: ## Stop production services
+	$(call print_status,"Stopping production services...")
+	@docker-compose -f docker-compose.prod.yml --env-file .env.production down
+	$(call print_success,"Production services stopped")
+
+stop: ## Stop all services (both dev and prod)
+	$(call print_status,"Stopping all services...")
+	@make stop-dev
+	@make stop-prod
+	$(call print_success,"All services stopped")
+
+clean: ## Clean everything
+	$(call print_status,"Cleaning up...")
+	@docker-compose --env-file .env.development down -v
+	@docker-compose -f docker-compose.prod.yml --env-file .env.production down -v
+	@docker system prune -f
+	@rm -f $(BUILD_LOG)
+	$(call print_success,"Cleanup completed")
+
+# New debugging commands
+
+logs: ## View logs for all services
+	$(call print_status,"Showing logs for all services...")
+	@docker-compose --env-file .env.development logs --tail=100 -f
+
+logs-auth: ## View logs for auth-service
+	$(call print_status,"Showing logs for auth-service...")
+	@docker-compose --env-file .env.development logs --tail=100 -f auth-service
+
+logs-customers: ## View logs for customers-service
+	$(call print_status,"Showing logs for customers-service...")
+	@docker-compose --env-file .env.development logs --tail=100 -f customers-service
+
+logs-web: ## View logs for web-service
+	$(call print_status,"Showing logs for web-service...")
+	@docker-compose --env-file .env.development logs --tail=100 -f web-service
+
+status: ## Show status of all containers
+	$(call print_status,"Checking container status...")
+	@echo "$(BOLD)CONTAINER STATUS:$(RESET)"
+	@docker-compose --env-file .env.development ps
+	@echo ""
+	@echo "$(BOLD)DETAILED STATUS:$(RESET)"
+	$(call check_container_status,beeconect-dev-traefik-1)
+	$(call check_container_status,beeconect-dev-postgres-auth-1)
+	$(call check_container_status,beeconect-dev-postgres-customers-1)
+	$(call check_container_status,beeconect-dev-redis-1)
+	$(call check_container_status,beeconect-dev-rabbitmq-1)
+	$(call check_container_status,beeconect-dev-auth-service-1)
+	$(call check_container_status,beeconect-dev-customers-service-1)
+	$(call check_container_status,beeconect-dev-web-service-1)
+
+check-health: ## Check health of all services
+	$(call print_status,"Checking service health...")
+	$(call check_service_health,"Traefik Dashboard","http://localhost:8080/api/version","traefik")
+	$(call check_service_health,"RabbitMQ Management","http://localhost:15672","rabbitmq")
+	$(call check_service_health,"Auth Service","http://localhost:8001/health","auth-service")
+	$(call check_service_health,"Customers Service","http://localhost:8016/health","customers-service")
+	$(call check_service_health,"Web Service","http://localhost:3001","web-service")
+
+debug-auth: ## Debug auth-service
+	$(call print_status,"Debugging auth-service...")
+	@echo "$(BOLD)CONTAINER STATUS:$(RESET)"
+	$(call check_container_status,beeconect-dev-auth-service-1)
+	@echo ""
+	@echo "$(BOLD)DEPENDENCY STATUS:$(RESET)"
+	$(call check_container_status,beeconect-dev-postgres-auth-1)
+	$(call check_container_status,beeconect-dev-redis-1)
+	$(call check_container_status,beeconect-dev-rabbitmq-1)
+	@echo ""
+	@echo "$(BOLD)SERVICE HEALTH:$(RESET)"
+	$(call check_service_health,"Auth Service","http://localhost:8001/health","auth-service")
+	@echo ""
+	@echo "$(BOLD)RECENT LOGS:$(RESET)"
+	@docker logs --tail=20 beeconect-dev-auth-service-1 2>/dev/null || echo "No logs available"
+	@echo ""
+	@echo "For full logs, run: $(BOLD)make logs-auth$(RESET)"
+
+debug-customers: ## Debug customers-service
+	$(call print_status,"Debugging customers-service...")
+	@echo "$(BOLD)CONTAINER STATUS:$(RESET)"
+	$(call check_container_status,beeconect-dev-customers-service-1)
+	@echo ""
+	@echo "$(BOLD)DEPENDENCY STATUS:$(RESET)"
+	$(call check_container_status,beeconect-dev-postgres-customers-1)
+	$(call check_container_status,beeconect-dev-rabbitmq-1)
+	@echo ""
+	@echo "$(BOLD)SERVICE HEALTH:$(RESET)"
+	$(call check_service_health,"Customers Service","http://localhost:8016/health","customers-service")
+	@echo ""
+	@echo "$(BOLD)RECENT LOGS:$(RESET)"
+	@docker logs --tail=20 beeconect-dev-customers-service-1 2>/dev/null || echo "No logs available"
+	@echo ""
+	@echo "For full logs, run: $(BOLD)make logs-customers$(RESET)"
+
+debug-web: ## Debug web-service
+	$(call print_status,"Debugging web-service...")
+	@echo "$(BOLD)CONTAINER STATUS:$(RESET)"
+	$(call check_container_status,beeconect-dev-web-service-1)
+	@echo ""
+	@echo "$(BOLD)DEPENDENCY STATUS:$(RESET)"
+	$(call check_container_status,beeconect-dev-auth-service-1)
+	$(call check_container_status,beeconect-dev-customers-service-1)
+	@echo ""
+	@echo "$(BOLD)SERVICE HEALTH:$(RESET)"
+	$(call check_service_health,"Web Service","http://localhost:3001","web-service")
+	@echo ""
+	@echo "$(BOLD)RECENT LOGS:$(RESET)"
+	@docker logs --tail=20 beeconect-dev-web-service-1 2>/dev/null || echo "No logs available"
+	@echo ""
+	@echo "For full logs, run: $(BOLD)make logs-web$(RESET)"

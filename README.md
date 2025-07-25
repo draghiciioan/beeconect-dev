@@ -89,9 +89,9 @@ Toate serviciile folosesc baze PostgreSQL proprii.
    make setup
    ```
    
-   Pentru utilizatorii Windows:
+   Pentru utilizatorii Windows (folosind PowerShell):
    ```
-   setup.bat
+   .\make.ps1 setup
    ```
 
 3. Pornește toate serviciile:
@@ -99,9 +99,9 @@ Toate serviciile folosesc baze PostgreSQL proprii.
    make dev
    ```
    
-   Pentru utilizatorii Windows:
+   Pentru utilizatorii Windows (folosind PowerShell):
    ```
-   dev.bat
+   .\make.ps1 dev
    ```
 
 4. Accesează serviciile:
@@ -123,21 +123,22 @@ Toate serviciile folosesc baze PostgreSQL proprii.
 - `make stop` - Oprește toate serviciile
 - `make clean` - Curăță tot
 
-#### Pentru Windows (folosind fișiere batch)
+#### Pentru Windows (folosind PowerShell)
 
-- `setup.bat` - Configurează mediul de dezvoltare
-- `dev.bat` - Pornește toate serviciile
-- `infrastructure.bat` - Pornește doar serviciile de infrastructură (baze de date, mesagerie)
-- `auth-service.bat` - Pornește serviciul de autentificare și componentele necesare
-- `customers-service.bat` - Pornește serviciul de clienți și componentele necesare
-- `web-service.bat` - Pornește interfața web și serviciile de care depinde
-- `stop.bat` - Oprește toate serviciile
-- `clean.bat` - Curăță tot
-- `prod.bat` - Pornește toate serviciile în modul producție
+- `.\make.ps1 help` - Afișează toate comenzile disponibile
+- `.\make.ps1 setup` - Configurează mediul de dezvoltare
+- `.\make.ps1 dev` - Pornește toate serviciile
+- `.\make.ps1 infrastructure` - Pornește doar serviciile de infrastructură (baze de date, mesagerie)
+- `.\make.ps1 auth-service` - Pornește serviciul de autentificare și componentele necesare
+- `.\make.ps1 customers-service` - Pornește serviciul de clienți și componentele necesare
+- `.\make.ps1 web-service` - Pornește interfața web și serviciile de care depinde
+- `.\make.ps1 stop` - Oprește toate serviciile
+- `.\make.ps1 clean` - Curăță tot
+- `.\make.ps1 prod` - Pornește toate serviciile în modul producție
 
 ### Rularea din PyCharm
 
-Proiectul include configurații de rulare pentru PyCharm care permit executarea fișierelor batch direct din interfața IDE-ului:
+Proiectul include configurații de rulare pentru PyCharm care permit executarea comenzilor Makefile direct din interfața IDE-ului:
 
 1. Deschideți proiectul în PyCharm
 2. Accesați meniul de rulare din partea de sus a ferestrei (dropdown lângă butonul de rulare)

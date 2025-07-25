@@ -1,4 +1,4 @@
-.PHONY: help setup dev prod stop-dev stop-prod stop clean infrastructure auth-service customers-service web-service
+.PHONY: help setup dev prod stop-dev stop-prod stop clean infrastructure auth-service customers-service web-service logs logs-auth logs-customers logs-web down restart restart-dev restart-prod status
 
 help: ## Show help
 	@echo 'BeeConect Commands:'
@@ -79,3 +79,41 @@ clean: ## Clean everything
 	@docker-compose --env-file .env.development down -v
 	@docker-compose -f docker-compose.prod.yml --env-file .env.production down -v
 	@docker system prune -f
+
+logs: ## View logs for all services
+	@echo "Showing logs for all services..."
+	@docker-compose --env-file .env.development logs --tail=100 -f
+
+logs-auth: ## View logs for auth-service
+	@echo "Showing logs for auth-service..."
+	@docker-compose --env-file .env.development logs --tail=100 -f auth-service
+
+logs-customers: ## View logs for customers-service
+	@echo "Showing logs for customers-service..."
+	@docker-compose --env-file .env.development logs --tail=100 -f customers-service
+
+logs-web: ## View logs for web-service
+	@echo "Showing logs for web-service..."
+	@docker-compose --env-file .env.development logs --tail=100 -f web-service
+
+down: ## Stop and remove all containers, networks, and volumes
+	@echo "Stopping and removing all containers, networks, and volumes..."
+	@docker-compose --env-file .env.development down -v
+	@docker-compose -f docker-compose.prod.yml --env-file .env.production down -v
+
+restart: ## Restart all services (both dev and prod)
+	@echo "Restarting all services..."
+	@make restart-dev
+	@make restart-prod
+
+restart-dev: ## Restart development services
+	@echo "Restarting development services..."
+	@docker-compose --env-file .env.development restart
+
+restart-prod: ## Restart production services
+	@echo "Restarting production services..."
+	@docker-compose -f docker-compose.prod.yml --env-file .env.production restart
+
+status: ## Show status of all containers
+	@echo "Checking container status..."
+	@docker-compose --env-file .env.development ps
