@@ -120,22 +120,19 @@ services:
       - postgres-customers
       - rabbitmq
       
-  frontend-web-service:
+  web-service:
     build:
-      context: ../microservicii/bee_frontend_web_service
+      context: ../microservicii/bee_web_service
       dockerfile: Dockerfile
     ports:
       - "3001:80"
     environment:
-      - VITE_API_URL=http://localhost:8000
-      - VITE_AUTH_SERVICE_URL=http://localhost:8001
-      - VITE_CUSTOMERS_SERVICE_URL=http://localhost:8016
-      - VITE_JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-jwt-secret-key-123}
-      - VITE_TOKEN_REFRESH_INTERVAL=900000
-      - VITE_APP_NAME=BeeConect
-      - VITE_APP_VERSION=1.0.0
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:8001
+      - REACT_APP_CUSTOMERS_API_URL=http://localhost:8016
     networks:
       - beeconect
     depends_on:
       - auth-service
       - customers-service
+      

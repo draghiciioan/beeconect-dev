@@ -104,10 +104,12 @@ Mediul de producție este optimizat pentru performanță, securitate și fiabili
    AUTH_SERVICE_WORKERS=2
    DOMAIN_NAME=beeconect.com
    ACME_EMAIL=admin@beeconect.com
-   TRAEFIK_BASIC_AUTH=admin:$apr1$CHANGE_THIS_TO_HTPASSWD_HASH
+   TRAEFIK_BASIC_AUTH=admin:$$apr1$$CHANGE_THIS_TO_HTPASSWD_HASH
    ```
 
-   **Important**: Înlocuiește toate valorile placeholder cu valori securizate reale.
+   **Important**: 
+   - Înlocuiește toate valorile placeholder cu valori securizate reale.
+   - Observați că semnele dollar ($) din hash-ul htpasswd sunt dublate ($$). Acest lucru este necesar pentru a evita ca Docker Compose să le interpreteze ca referințe de variabile. Fără această dublare, veți vedea avertismente precum "The 'apr1' variable is not set".
 
 2. Generează un hash pentru autentificarea de bază Traefik:
    ```

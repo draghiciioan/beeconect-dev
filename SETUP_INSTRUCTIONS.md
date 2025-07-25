@@ -1,106 +1,144 @@
-# BeeConect Microservices Setup Instructions
+# Instrucțiuni de Configurare a Microserviciilor BeeConect
 
-## Overview
+## Prezentare generală
 
-This document explains how all microservices have been connected in the beeconect-dev environment, allowing you to run them from a central location. The following microservices are now integrated:
+Acest document explică modul în care toate microserviciile au fost conectate în mediul beeconect-dev, permițându-vă să le rulați dintr-o locație centrală. Următoarele microservicii sunt acum integrate:
 
-1. **Auth Service** (bee_auth_services)
-2. **Customers Service** (bee_customers_service)
-3. **Frontend Web Service** (bee_frontend_web_service)
+1. **Serviciul de Autentificare** (bee_auth_services)
+2. **Serviciul de Clienți** (bee_customers_service)
+3. **Serviciul Web** (bee_web_service)
 
-## Changes Made
+## Modificări efectuate
 
-The following changes were made to connect all microservices:
+Următoarele modificări au fost făcute pentru a conecta toate microserviciile:
 
-1. **Updated docker-compose.yml**:
-   - Added service definitions for customers-service and frontend-web-service
-   - Added a PostgreSQL database for the customers service
-   - Configured network settings for all services
-   - Set up volume mappings for databases
-   - Configured environment variables for all services
+1. **Actualizarea docker-compose.yml**:
+   - Adăugarea definițiilor de servicii pentru customers-service și web-service
+   - Adăugarea unei baze de date PostgreSQL pentru serviciul de clienți
+   - Configurarea setărilor de rețea pentru toate serviciile
+   - Configurarea mapărilor de volume pentru bazele de date
+   - Configurarea variabilelor de mediu pentru toate serviciile
 
-2. **Created Dockerfile for Frontend Web Service**:
-   - Set up a multi-stage build process
-   - First stage builds the React application
-   - Second stage serves the built application using Nginx
+2. **Crearea Dockerfile pentru Serviciul Web**:
+   - Configurarea unui proces de build în mai multe etape
+   - Prima etapă construiește aplicația React
+   - A doua etapă servește aplicația construită folosind Nginx
 
-3. **Updated .env.development**:
-   - Added environment variables for the customers service
-   - Added environment variables for the frontend service
-   - Updated CORS settings to include all service URLs
+3. **Actualizarea .env.development**:
+   - Adăugarea variabilelor de mediu pentru serviciul de clienți
+   - Adăugarea variabilelor de mediu pentru serviciul web
+   - Actualizarea setărilor CORS pentru a include URL-urile tuturor serviciilor
 
-4. **Updated Makefile**:
-   - Added information about the new services in the output messages
+4. **Actualizarea Makefile**:
+   - Adăugarea informațiilor despre noile servicii în mesajele de output
 
-## How to Use
+## Cum să utilizați
 
-### Starting All Services
+### Pornirea tuturor serviciilor
 
-To start all services in development mode, run:
+#### Pentru Linux/macOS
+
+Pentru a porni toate serviciile în modul de dezvoltare, rulați:
 
 ```bash
 cd beeconect-dev
 make dev
 ```
 
-This will start all services and display URLs for accessing them:
-- Traefik Dashboard: http://localhost:8080
-- RabbitMQ Management: http://localhost:15672
-- Auth Service: http://localhost:8001
-- Customers Service: http://localhost:8016
-- Frontend Web Service: http://localhost:3001
+#### Pentru Windows
 
-### Stopping All Services
+Pentru a porni toate serviciile în modul de dezvoltare, rulați:
 
-To stop all services, run:
+```
+cd beeconect-dev
+dev.bat
+```
+
+Aceasta va porni toate serviciile și va afișa URL-urile pentru accesarea lor:
+- Dashboard Traefik: http://localhost:8080
+- Management RabbitMQ: http://localhost:15672
+- Serviciul de Autentificare: http://localhost:8001
+- Serviciul de Clienți: http://localhost:8016
+- Serviciul Web: http://localhost:3001
+
+### Oprirea tuturor serviciilor
+
+#### Pentru Linux/macOS
+
+Pentru a opri toate serviciile, rulați:
 
 ```bash
 cd beeconect-dev
 make stop-dev
 ```
 
-### Cleaning Up
+#### Pentru Windows
 
-To clean up all containers and volumes, run:
+Pentru a opri toate serviciile, rulați:
+
+```
+cd beeconect-dev
+stop.bat
+```
+
+### Curățare
+
+#### Pentru Linux/macOS
+
+Pentru a curăța toate containerele și volumele, rulați:
 
 ```bash
 cd beeconect-dev
 make clean
 ```
 
-## Service URLs and Ports
+#### Pentru Windows
 
-| Service | URL | Internal Port | External Port |
+Pentru a curăța toate containerele și volumele, rulați:
+
+```
+cd beeconect-dev
+clean.bat
+```
+
+## URL-uri și porturi de servicii
+
+| Serviciu | URL | Port intern | Port extern |
 |---------|-----|---------------|--------------|
-| Auth Service | http://localhost:8001 | 8000 | 8001 |
-| Customers Service | http://localhost:8016 | 8007 | 8016 |
-| Frontend Web Service | http://localhost:3001 | 80 | 3001 |
-| Traefik Dashboard | http://localhost:8080 | 8080 | 8080 |
-| RabbitMQ Management | http://localhost:15672 | 15672 | 15672 |
+| Serviciul de Autentificare | http://localhost:8001 | 8000 | 8001 |
+| Serviciul de Clienți | http://localhost:8016 | 8007 | 8016 |
+| Serviciul Web | http://localhost:3001 | 80 | 3001 |
+| Dashboard Traefik | http://localhost:8080 | 8080 | 8080 |
+| Management RabbitMQ | http://localhost:15672 | 15672 | 15672 |
 | PostgreSQL Auth | localhost:5432 | 5432 | 5432 |
 | PostgreSQL Customers | localhost:5433 | 5432 | 5433 |
 | Redis | localhost:6379 | 6379 | 6379 |
 | RabbitMQ | localhost:5672 | 5672 | 5672 |
 
-## Troubleshooting
+## Depanare
 
-If you encounter any issues:
+Dacă întâmpinați probleme:
 
-1. Check that Docker is running
-2. Ensure all ports are available (not used by other applications)
-3. Check the logs for each service:
+1. Verificați că Docker rulează
+2. Asigurați-vă că toate porturile sunt disponibile (nu sunt utilizate de alte aplicații)
+3. Verificați log-urile pentru fiecare serviciu:
    ```bash
    docker-compose logs auth-service
    docker-compose logs customers-service
-   docker-compose logs frontend-web-service
+   docker-compose logs web-service
    ```
-4. If database connection issues occur, you may need to wait a few seconds for the databases to initialize
+4. Dacă apar probleme de conexiune la baza de date, este posibil să fie nevoie să așteptați câteva secunde pentru ca bazele de date să se inițializeze
 
-## Next Steps
+## Pași următori
 
-As more microservices are developed, they can be added to the docker-compose.yml file following the same pattern:
+Pe măsură ce sunt dezvoltate mai multe microservicii, acestea pot fi adăugate în fișierul docker-compose.yml urmând același model:
 
-1. Add a database service if needed
-2. Add the microservice with appropriate environment variables
-3. Update the .env.development file with any new environment variables
-4. Update the Makefile to include information about the new service
+1. Adăugați un serviciu de bază de date dacă este necesar
+2. Adăugați microserviciul cu variabilele de mediu corespunzătoare
+3. Actualizați fișierul .env.development cu orice variabile de mediu noi
+4. Actualizați Makefile pentru a include informații despre noul serviciu
+5. Pentru suport Windows, creați sau actualizați fișierele batch corespunzătoare
+
+### Notă pentru dezvoltatorii Windows
+
+Fișierele batch (.bat) oferă aceeași funcționalitate ca și comenzile make pentru utilizatorii Windows. Când adăugați un nou microserviciu sau modificați configurația existentă, asigurați-vă că actualizați atât Makefile-ul cât și fișierele batch corespunzătoare pentru a menține compatibilitatea între platforme.

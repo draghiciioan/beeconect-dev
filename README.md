@@ -88,10 +88,20 @@ Toate serviciile folosesc baze PostgreSQL proprii.
    ```
    make setup
    ```
+   
+   Pentru utilizatorii Windows:
+   ```
+   setup.bat
+   ```
 
 3. Pornește toate serviciile:
    ```
    make dev
+   ```
+   
+   Pentru utilizatorii Windows:
+   ```
+   dev.bat
    ```
 
 4. Accesează serviciile:
@@ -101,15 +111,47 @@ Toate serviciile folosesc baze PostgreSQL proprii.
 
 ### Comenzi Utile
 
+#### Pentru Linux/macOS (folosind make)
+
 - `make help` - Afișează toate comenzile disponibile
 - `make setup` - Configurează mediul de dezvoltare
 - `make dev` - Pornește toate serviciile
 - `make infrastructure` - Pornește doar serviciile de infrastructură (baze de date, mesagerie)
 - `make auth-service` - Pornește serviciul de autentificare și componentele necesare
 - `make customers-service` - Pornește serviciul de clienți și componentele necesare
-- `make frontend-web-service` - Pornește interfața web și serviciile de care depinde
+- `make web-service` - Pornește interfața web și serviciile de care depinde
 - `make stop` - Oprește toate serviciile
 - `make clean` - Curăță tot
+
+#### Pentru Windows (folosind fișiere batch)
+
+- `setup.bat` - Configurează mediul de dezvoltare
+- `dev.bat` - Pornește toate serviciile
+- `infrastructure.bat` - Pornește doar serviciile de infrastructură (baze de date, mesagerie)
+- `auth-service.bat` - Pornește serviciul de autentificare și componentele necesare
+- `customers-service.bat` - Pornește serviciul de clienți și componentele necesare
+- `web-service.bat` - Pornește interfața web și serviciile de care depinde
+- `stop.bat` - Oprește toate serviciile
+- `clean.bat` - Curăță tot
+- `prod.bat` - Pornește toate serviciile în modul producție
+
+### Rularea din PyCharm
+
+Proiectul include configurații de rulare pentru PyCharm care permit executarea fișierelor batch direct din interfața IDE-ului:
+
+1. Deschideți proiectul în PyCharm
+2. Accesați meniul de rulare din partea de sus a ferestrei (dropdown lângă butonul de rulare)
+3. Selectați una dintre configurațiile disponibile:
+   - `setup` - Configurează mediul de dezvoltare
+   - `dev` - Pornește toate serviciile
+   - `prod` - Pornește toate serviciile în modul producție
+   - `infrastructure` - Pornește doar serviciile de infrastructură
+   - `auth-service` - Pornește serviciul de autentificare
+   - `customers-service` - Pornește serviciul de clienți
+   - `web-service` - Pornește interfața web
+   - `stop` - Oprește toate serviciile
+   - `clean` - Curăță tot
+4. Apăsați butonul de rulare (săgeată verde) sau folosiți scurtătura Shift+F10
 
 ## Etape de Dezvoltare
 

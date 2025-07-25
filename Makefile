@@ -1,4 +1,4 @@
-.PHONY: help setup dev prod stop-dev stop-prod stop clean infrastructure auth-service customers-service frontend-web-service
+.PHONY: help setup dev prod stop-dev stop-prod stop clean infrastructure auth-service customers-service web-service
 
 help: ## Show help
 	@echo 'BeeConect Commands:'
@@ -17,7 +17,7 @@ dev: ## Start all services in development mode
 	@echo "  - RabbitMQ Management: http://localhost:15672"
 	@echo "  - Auth Service: http://localhost:8001"
 	@echo "  - Customers Service: http://localhost:8016"
-	@echo "  - Frontend Web Service: http://localhost:3001"
+	@echo "  - Web Service: http://localhost:3001"
 
 prod: ## Start all services in production mode
 	@echo "Starting BeeConect production environment..."
@@ -53,10 +53,10 @@ customers-service: ## Start customers-service with its dependencies
 	@echo "  - PostgreSQL Customers: localhost:5433"
 	@echo "  - RabbitMQ Management: http://localhost:15672"
 
-frontend-web-service: ## Start frontend-web-service with its dependencies
-	@echo "Starting frontend-web-service with dependencies..."
-	@docker-compose --env-file .env.development up --build -d auth-service customers-service frontend-web-service
-	@echo "Frontend web service available at: http://localhost:3001"
+web-service: ## Start web-service with its dependencies
+	@echo "Starting web-service with dependencies..."
+	@docker-compose --env-file .env.development up --build -d auth-service customers-service web-service
+	@echo "Web Service available at: http://localhost:3001"
 	@echo "Dependencies available:"
 	@echo "  - Auth Service: http://localhost:8001"
 	@echo "  - Customers Service: http://localhost:8016"

@@ -1,96 +1,96 @@
-# Docker Desktop Setup for BeeConect
+# Configurarea Docker Desktop pentru BeeConect
 
-This document provides instructions for setting up Docker Desktop on Windows, which is required to run the BeeConect project.
+Acest document oferă instrucțiuni pentru configurarea Docker Desktop pe Windows, care este necesar pentru a rula proiectul BeeConect.
 
-## Issue Description
+## Descrierea problemei
 
-The error message:
+Mesajul de eroare:
 ```
 unable to get image 'rabbitmq:3-management-alpine': error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/images/rabbitmq:3-management-alpine/json": open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.
 ```
 
-This error indicates that Docker Desktop is either:
-1. Not installed on your system
-2. Not running
-3. Not properly configured
+Această eroare indică faptul că Docker Desktop este fie:
+1. Neinstalat pe sistemul dumneavoastră
+2. Nu rulează
+3. Nu este configurat corespunzător
 
-## Solution
+## Soluție
 
-### 1. Check if Docker Desktop is Installed
+### 1. Verificați dacă Docker Desktop este instalat
 
-1. Look for Docker Desktop in your Start menu or installed applications.
-2. If not installed, download and install Docker Desktop from the official website:
-   - Visit [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/)
-   - Click "Download for Windows"
-   - Follow the installation instructions
+1. Căutați Docker Desktop în meniul Start sau în aplicațiile instalate.
+2. Dacă nu este instalat, descărcați și instalați Docker Desktop de pe site-ul oficial:
+   - Vizitați [Docker Desktop pentru Windows](https://www.docker.com/products/docker-desktop/)
+   - Faceți clic pe "Download for Windows"
+   - Urmați instrucțiunile de instalare
 
-### 2. If Docker Desktop is Installed but Not Running
+### 2. Dacă Docker Desktop este instalat, dar nu rulează
 
-1. Start Docker Desktop from the Start menu or desktop shortcut
-2. Wait for Docker Desktop to fully initialize (the Docker icon in the system tray should stop animating)
-3. You may need to accept the Docker Desktop license agreement if this is the first time running it
+1. Porniți Docker Desktop din meniul Start sau de pe shortcut-ul de pe desktop
+2. Așteptați ca Docker Desktop să se inițializeze complet (iconița Docker din system tray ar trebui să nu mai fie animată)
+3. Este posibil să fie necesar să acceptați acordul de licență Docker Desktop dacă este prima dată când îl rulați
 
-### 3. Verify Docker Desktop is Running Properly
+### 3. Verificați dacă Docker Desktop rulează corect
 
-Open PowerShell or Command Prompt and run:
+Deschideți PowerShell sau Command Prompt și rulați:
 ```
 docker info
 ```
 
-If Docker is running correctly, you should see system information about your Docker installation.
+Dacă Docker rulează corect, ar trebui să vedeți informații despre instalarea Docker.
 
-### 4. Troubleshooting Docker Desktop Issues
+### 4. Depanarea problemelor Docker Desktop
 
-If Docker Desktop is installed but still not working:
+Dacă Docker Desktop este instalat, dar tot nu funcționează:
 
-1. **Restart Docker Desktop**:
-   - Right-click the Docker icon in the system tray
-   - Select "Restart"
+1. **Reporniți Docker Desktop**:
+   - Faceți clic dreapta pe iconița Docker din system tray
+   - Selectați "Restart"
 
-2. **Check Windows Subsystem for Linux (WSL) Requirements**:
-   - Docker Desktop requires WSL 2 on Windows
-   - Open PowerShell as Administrator and run:
+2. **Verificați cerințele Windows Subsystem for Linux (WSL)**:
+   - Docker Desktop necesită WSL 2 pe Windows
+   - Deschideți PowerShell ca Administrator și rulați:
      ```
      wsl --status
      ```
-   - If WSL is not installed or needs updating, run:
+   - Dacă WSL nu este instalat sau trebuie actualizat, rulați:
      ```
      wsl --install
      ```
-   - You may need to restart your computer after installing WSL
+   - Este posibil să fie nevoie să reporniți computerul după instalarea WSL
 
-3. **Check Virtualization Settings**:
-   - Docker requires hardware virtualization to be enabled in BIOS/UEFI
-   - Open Task Manager (Ctrl+Shift+Esc) and go to the Performance tab
-   - Under CPU, check if "Virtualization" is enabled
-   - If not, you'll need to enable virtualization in your BIOS/UEFI settings
+3. **Verificați setările de virtualizare**:
+   - Docker necesită ca virtualizarea hardware să fie activată în BIOS/UEFI
+   - Deschideți Task Manager (Ctrl+Shift+Esc) și accesați tab-ul Performance
+   - La CPU, verificați dacă "Virtualization" este activată
+   - Dacă nu, va trebui să activați virtualizarea în setările BIOS/UEFI
 
-4. **Reset Docker Desktop to Factory Defaults**:
-   - Open Docker Desktop settings
-   - Go to "Troubleshoot" section
-   - Click "Reset to factory defaults"
-   - This will reset Docker Desktop but won't affect your containers or images
+4. **Resetați Docker Desktop la setările din fabrică**:
+   - Deschideți setările Docker Desktop
+   - Accesați secțiunea "Troubleshoot"
+   - Faceți clic pe "Reset to factory defaults"
+   - Aceasta va reseta Docker Desktop, dar nu va afecta containerele sau imaginile dumneavoastră
 
-## Running BeeConect After Docker Desktop is Working
+## Rularea BeeConect după ce Docker Desktop funcționează
 
-Once Docker Desktop is properly installed and running:
+Odată ce Docker Desktop este instalat și rulează corect:
 
-1. Open PowerShell or Command Prompt
-2. Navigate to the BeeConect project directory:
+1. Deschideți PowerShell sau Command Prompt
+2. Navigați la directorul proiectului BeeConect:
    ```
    cd C:\Users\jhony\Desktop\BeeConect\beeconect-dev
    ```
-3. Start the development environment using the Makefile:
+3. Porniți mediul de dezvoltare folosind Makefile:
    ```
    make dev
    ```
-   Or directly with Docker Compose:
+   Sau direct cu Docker Compose:
    ```
    docker-compose --env-file .env.development up --build -d
    ```
 
-## Additional Resources
+## Resurse suplimentare
 
-- [Docker Desktop for Windows Documentation](https://docs.docker.com/desktop/install/windows-install/)
-- [Troubleshooting Docker Desktop on Windows](https://docs.docker.com/desktop/troubleshoot/overview/)
-- [Windows Subsystem for Linux Documentation](https://learn.microsoft.com/en-us/windows/wsl/install)
+- [Documentația Docker Desktop pentru Windows](https://docs.docker.com/desktop/install/windows-install/)
+- [Depanarea Docker Desktop pe Windows](https://docs.docker.com/desktop/troubleshoot/overview/)
+- [Documentația Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install)
